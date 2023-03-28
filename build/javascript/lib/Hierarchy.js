@@ -88,12 +88,13 @@ export class Hierarchy {
 
 	getNode(path) {
 		if (typeof path === "string") {
+			if (path === '/') { return this.#root; }
 			path = new Path.Path(path);
 		}
+
 		if (!path.isAbsolute) { return null; }
-		if (path.str === '/') {
-			return this.#root;
-		}
+		if (path.str === '/') { return this.#root; }
+
 		let ret = this.#root;
 		for (let i = 0; i < path.length; ++i) {
 			ret = ret.getChildNode(path.at(i));

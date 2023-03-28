@@ -135,7 +135,7 @@ let dataController = new DataController();
 		});
 	}
 
-	if (window.location.pathname.startsWith('/html/')) {
+	if (window.location.pathname.startsWith('/html/') && window.location.pathname.endsWith('.html') && window.location.pathname.length > 11) {
 		dataController.currentNode = new Path.Path(window.location.pathname.substring(5, window.location.pathname.length - 5));
 	} else if (window.location.pathname === '/') {
 		dataController.currentNode = new Path.Path('/');
