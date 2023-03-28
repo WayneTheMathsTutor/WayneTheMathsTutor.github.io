@@ -43,21 +43,22 @@ class DataController {
 			this.#currentNode = this.#currentNode.getNode(path);
 		}
 
-		let pageData;
+		if (this.#currentNode === null) {
+			document.querySelector('#mainContent').innerHTML = "<h1>404 Error: Page not Found</h1><p>The url you have searched for doesn't exist. Please use a valid url or navigate the site using the navigation links above.</p>";
+			document.querySelector('body').scrollTop = 0;
+			return;
+		}
+
 		if (!this.#currentNode.isBranch) {
-			pageData = this.#currentNode.data;
+			let pageData = this.#currentNode.data;
 			if (pageData.htmlData === null) {
 				pageData.fetchData(dataReady);
 			} else {
 				dataReady(pageData);
 			}
 		} else if (this.#currentNode.parentNode === null) {
-			pageData = this.#pages[0];
-			dataReady(pageData);
-		} else {
-			return;
+			dataReady(this.#pages[0]);
 		}
-
 	}
 	get currentNode() { return this.#currentNode; }
 
@@ -88,6 +89,10 @@ class DataController {
 };
 
 function dataReady(pageData) {
+	if (!dataController.currentNode) {
+		return;
+	}
+
 	if (pageData === dataController.currentNode.data ||
 		(dataController.currentNode.parentNode === null &&
 		pageData.pathID.str === '/')
@@ -130,8 +135,13 @@ let dataController = new DataController();
 		});
 	}
 
-	let navPath = (window.location.pathname.startsWith('/html/')) ? window.location.pathname.substring(5, window.location.pathname.length - 5) : '/';
-	dataController.currentNode = new Path.Path(navPath);
+	if (window.location.pathname.startsWith('/html/')) {
+		dataController.currentNode = new Path.Path(window.location.pathname.substring(5, window.location.pathname.length - 5));
+	} else if (window.location.pathname === '/') {
+		dataController.currentNode = new Path.Path('/');
+	} else {
+		dataController.currentNode = new Path.Path(window.location.pathname);
+	}
 
 	// Setup popstate
 	addEventListener('popstate', (event) => {
