@@ -1,10 +1,10 @@
-import * as Path from './Path.js'
-export * as Path from './Path.js'
+import * as ErrorModule from './ErrorModule.js'
+import {Path} from './Path.js'
 
 class HierarchyNode {
 	#parentNode = null;
 	#isBranch;
-	#name = null;
+	name = null;
 	data = [];
 
 	set parentNode(inputParentNode) {
@@ -27,22 +27,12 @@ class HierarchyNode {
 
 	get isBranch() { return this.#isBranch; }
 
-	set name(inputName) {
-		if (!typeof(inputName) === 'string') {
-			throw "Hierarchy: " + inputName + "is not a String."
-		} else if (inputName.includes('/') && !(this.parentNode === null)) {
-			throw "Hierarchy: Cannot use '/' in the name of a node."
-		}
-		this.#name = inputName;
-	}
-	get name() { return this.#name; }
-
 	getAbsolutePath() {
 		let iterNode = this;
-		let nodeNames = [iterNode.name];
+		let nodeNames = [];
 		while (iterNode.parentNode != null) {
-			iterNode = iterNode.parentNode;
 			nodeNames.push(iterNode.name);
+			iterNode = iterNode.parentNode;
 		}
 		nodeNames.reverse();
 
@@ -50,27 +40,40 @@ class HierarchyNode {
 	}
 
 	getChildNode(childNodeName) {
-		if (!this.#isBranch) { return null; }
+		if (!this.#isBranch) {
+			ErrorModule.setError(1, "HierarchyNode.getChildNode Error: Node " + this.name + " is not a branch.");
+			return null;
+		}
+
 		for (let i = 0; i < this.data.length; ++i) {
 			if (this.data[i].name === childNodeName) {
 				return this.data[i];
 			}
 		}
+
+		ErrorModule.setError(2, "HierarchyNode.getChildNode Error: Cannot find child named: " + childNodeName + " on node " + this.name + ".");
 		return null;
 	}
 
 	getNode(path) {
-		if (path.isAbsolute) { return null; }
+		if (path.isAbsolute) {
+			ErrorModule.setError(1, "HierarchyNode.getNode Error: Path should be relative.");
+			return null;
+		}
+
 		let ret = this;
 		for (let i = 0; i < path.length; ++i) {
 			if (path.at(i) === '..') {
 				ret = ret.parentNode;
+				if (ret === null) {
+					ErrorModule.setError(2, "HierarchyNode.getNode Error: Cannot .. past root node.");
+					return null;
+				}
 			} else if (path.at(i) === '.') {
 				continue;
 			} else {
 				ret = ret.getChildNode(path.at(i));
 			}
-			if (ret === null) { return null; }
 		}
 		return ret;
 	}
@@ -86,27 +89,20 @@ export class Hierarchy {
 	#root = new HierarchyNode(null, '/');
 	get root() { return this.#root; }
 
-	getNode(path) {
-		if (typeof path === "string") {
-			if (path === '/') { return this.#root; }
-			path = new Path.Path(path);
-		}
+	leafNodes = [];
 
-		if (!path.isAbsolute) { return null; }
+	getNode(path) {
+		if (!path.isAbsolute) {
+			ErrorModule.setError(1, "Hierarchy.getNode Error: Path should be absolute.");
+			return null;
+		}
 		if (path.str === '/') { return this.#root; }
 
 		let ret = this.#root;
 		for (let i = 0; i < path.length; ++i) {
 			ret = ret.getChildNode(path.at(i));
-			if (ret === null) { return null; }
 		}
 		return ret;
-	}
-
-	setNodeDataFromArray(pathDataArray) {
-		for (let i = 0; i < pathDataArray.length; ++i) {
-			this.getNode(pathDataArray[i][0]).data = pathDataArray[i][1];
-		}
 	}
 
 	createNodes(parentNode, namesArray) {
@@ -115,13 +111,13 @@ export class Hierarchy {
 				let newNode = new HierarchyNode(parentNode, namesArray[i][0]);
 				this.createNodes(newNode, namesArray[i].slice(1));
 			} else {
-				new HierarchyNode(parentNode, namesArray[i], false);
+				let node = new HierarchyNode(parentNode, namesArray[i], false);
+				this.leafNodes.push(node);
 			}
 		}
 	}
 
-	constructor(namesArray, pathDataArray) {
+	constructor(namesArray) {
 		this.createNodes(this.root, namesArray);
-		this.setNodeDataFromArray(pathDataArray);
 	}
 };

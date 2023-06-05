@@ -1,0 +1,28 @@
+#testimonies .testimony {
+  max-width: 400px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  padding: 20px;
+  background-color: rgb(230, 230, 235);
+}
+#testimonies .testimony:nth-child(1) {
+  margin-top: 0;
+}
+#testimonies .testimony:nth-last-child(1) {
+  margin-bottom: 0;
+}
+#testimonies .testimony:nth-child(2n) {
+  margin-left: 15%;
+  border-radius: 5px 5px 0 5px;
+}
+#testimonies .testimony:nth-child(2n-1) {
+  margin-right: 15%;
+  border-radius: 5px 5px 5px 0;
+}
+#testimonies .testimony .author {
+  display: block;
+  margin-top: 1.5rem;
+  font-weight: 800;
+}
+
+/*# sourceMappingURL=Testimonials.css.map */

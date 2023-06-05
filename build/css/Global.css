@@ -1,0 +1,233 @@
+* {
+  margin: 0px;
+  border: 0px;
+  padding: 0px;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+html, body {
+  min-width: 100vw;
+  min-height: 100vh;
+}
+
+:root {
+  --vmin: min(100vw, 100vh);
+  --vmax: max(100vw, 100vh);
+}
+
+@font-face {
+  font-family: "Roboto-Black";
+  src: url("../font/Roboto-Black.ttf");
+}
+@font-face {
+  font-family: "Roboto";
+  src: url("../font/Roboto-Regular.ttf");
+}
+@font-face {
+  font-family: "Roboto-Bold";
+  src: url("../font/Roboto-Bold.ttf");
+}
+html {
+  font-family: "Roboto", "ariel", sans-serif;
+}
+
+body {
+  --menuOpen: 0;
+  --menuRowCount: calc(1 + var(--menuOpen) * 7);
+  min-height: 100vh;
+  display: flex;
+  flex-flow: column;
+}
+body > * {
+  box-sizing: border-box;
+}
+body > *:nth-child(1) {
+  flex-basis: calc(0.3 * var(--vmin));
+}
+body > *:nth-child(2) {
+  flex-basis: calc(1px * (1 + var(--menuOpen)) + 60px * var(--menuRowCount));
+}
+body > *:nth-child(3) {
+  flex-grow: 1;
+}
+body > *:nth-child(4) {
+  flex-basis: 200px;
+}
+
+header {
+  font-family: "Roboto-Black", "ariel", sans-serif;
+  color: white;
+  background-color: black;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+header #headerTitle {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+header #headerTitle img {
+  height: max(50px, 0.1 * var(--vmin));
+  padding: 0px max(13px, 0.03 * var(--vmin));
+}
+header #headerTitle h1 {
+  font-size: max(1.3rem, 0.06 * var(--vmin));
+}
+
+nav {
+  background-color: black;
+  border-top: solid 1px rgb(180, 180, 185);
+  overflow: hidden;
+  transition: flex-basis 0.5s ease-out;
+}
+nav button, nav div button {
+  width: 100%;
+  font-family: "Roboto-Bold", "arial", sans-serif;
+  font-size: 1rem;
+  line-height: 1rem;
+  color: white;
+  background-color: black;
+  cursor: pointer;
+}
+nav button:hover, nav div button:hover {
+  color: black;
+  background-color: white;
+}
+nav > button {
+  height: 61px;
+  border-bottom: solid 1px rgb(180, 180, 185);
+  fill: white;
+}
+nav > button:hover {
+  fill: black;
+}
+nav > button .menuIcon {
+  width: 11px;
+  height: 11px;
+  background-color: transparent;
+  margin-right: 4px;
+}
+nav > button .menuIcon rect {
+  x: -2.2781745931px;
+  width: 15.5563491861px;
+  height: 1.375px;
+  transform-origin: 50% 50%;
+}
+nav > button .menuIcon rect:nth-child(2) {
+  y: 4.8125px;
+}
+nav > button .menuIcon rect:nth-child(1) {
+  y: calc(4.8125px * var(--menuOpen));
+  transform: rotate(calc(var(--menuOpen) * 45deg));
+}
+nav > button .menuIcon rect:nth-child(2) {
+  opacity: calc(100% * (1 - var(--menuOpen)));
+  transition: opacity 0s linear 0.25s;
+}
+nav > button .menuIcon rect:nth-child(3) {
+  y: calc(4.8125px * (2 - var(--menuOpen)));
+  transform: rotate(calc(var(--menuOpen) * -45deg));
+}
+nav > button .menuIcon rect:nth-child(1), nav > button .menuIcon rect:nth-child(3) {
+  transition: y 0.25s linear calc(0.25s * (1 - var(--menuOpen))), transform 0.25s linear calc(var(--menuOpen) * 0.25s);
+}
+nav #menuItemContainer {
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: center;
+  justify-content: center;
+}
+nav #menuItemContainer button {
+  flex-basis: 60px;
+}
+
+@media screen and (min-width: 450px) {
+  body {
+    --menuRowCount: 2;
+  }
+  nav > button {
+    display: none;
+  }
+  nav #menuItemContainer {
+    flex-flow: row wrap;
+    padding: 15px calc((100vw - 450px) / 2);
+  }
+  nav #menuItemContainer button {
+    flex-basis: max-content;
+    height: 45px;
+    padding: 0 20px;
+  }
+}
+@media screen and (min-width: 730px) {
+  body {
+    --menuRowCount: 1;
+  }
+  nav #menuItemContainer {
+    height: 100%;
+    padding: 0;
+  }
+  nav #menuItemContainer button {
+    height: 100%;
+  }
+}
+#mainContent {
+  padding: 30px max(30px, (100% - 600px) / 2) 30px;
+  color: rgb(10, 10, 50);
+  background-color: rgb(180, 180, 185);
+}
+#mainContent h1 {
+  font-size: 1.5rem;
+  padding-bottom: 1.5rem;
+}
+#mainContent h2 {
+  font-size: 1.4rem;
+}
+#mainContent p {
+  padding-bottom: 1.5rem;
+  font-size: 1rem;
+  line-height: 1.5rem;
+}
+#mainContent p a {
+  color: rgb(50, 100, 200);
+}
+#mainContent p a:hover {
+  color: rgb(0, 180, 255);
+}
+#mainContent b {
+  font-size: 1rem;
+  line-height: 1.5rem;
+}
+
+footer {
+  padding: 30px 0px 0px 30px;
+  color: white;
+  background-color: black;
+}
+footer #websiteIcons {
+  margin-top: 10px;
+  display: flex;
+}
+footer #websiteIcons a {
+  width: 24px;
+  height: 24px;
+  margin: 0 5px;
+  overflow: hidden;
+  border-radius: 50%;
+}
+footer #websiteIcons a:first-child {
+  margin-left: 0;
+}
+footer #websiteIcons a:last-child {
+  margin-right: 0;
+}
+footer #websiteIcons a img {
+  width: 100%;
+  height: 100%;
+}
+
+/*# sourceMappingURL=Global.css.map */

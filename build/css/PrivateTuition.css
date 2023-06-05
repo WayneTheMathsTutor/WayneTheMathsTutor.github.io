@@ -1,0 +1,47 @@
+#FeeOptions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 20px;
+}
+#FeeOptions .FeeOption {
+  box-sizing: border-box;
+  flex-basis: calc(100% - clamp(0px, 600 * (100% - 599px), 50% + 10px));
+  padding: 2.25rem 25px;
+  border: solid rgb(50, 100, 200) 2px;
+  border-radius: 10px;
+  background-color: rgb(230, 230, 235);
+  display: flex;
+  flex-direction: column;
+}
+#FeeOptions .FeeOption h2 {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+#FeeOptions .FeeOption ul {
+  flex-grow: 1;
+  padding-left: 25px;
+  padding-right: 20px;
+}
+#FeeOptions .FeeOption ul li {
+  line-height: 1.5rem;
+  padding-bottom: 0.75rem;
+}
+#FeeOptions .FeeOption a {
+  display: block;
+  margin-top: 0.75rem;
+  margin-left: 25px;
+  width: calc(100% - 50px);
+  text-align: center;
+  padding-top: 15px;
+  padding-bottom: 15px;
+  font-weight: 800;
+  color: white;
+  background-color: rgb(50, 100, 200);
+  border-radius: 10px;
+}
+#FeeOptions .FeeOption a:hover {
+  background-color: rgb(0, 180, 255);
+}
+
+/*# sourceMappingURL=PrivateTuition.css.map */
