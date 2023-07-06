@@ -104,5 +104,7 @@ export class PageDataController {
 			leafNode.data = new PageData();
 			leafNode.data.hierarchyNode = leafNode;
 		}
+
+		document.adoptedStyleSheets = [new CSSStyleSheet()];
 	}
 };
