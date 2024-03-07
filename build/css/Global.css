@@ -45,47 +45,44 @@ body {
 body > * {
   box-sizing: border-box;
 }
-body > *:nth-child(1) {
-  flex-basis: calc(0.3 * var(--vmin));
-}
-body > *:nth-child(2) {
-  flex-basis: calc(1px * (1 + var(--menuOpen)) + 60px * var(--menuRowCount));
-}
-body > *:nth-child(3) {
-  flex-grow: 1;
-}
-body > *:nth-child(4) {
-  flex-basis: 200px;
-}
 
-header {
+#mainNav {
   font-family: "Roboto-Black", "ariel", sans-serif;
   color: white;
   background-color: black;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
 }
-header #headerTitle {
+#mainNav > header {
+  flex-basis: calc(0.3 * var(--vmin));
   display: flex;
   align-items: center;
+  justify-content: center;
+}
+#mainNav > header > div {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
 }
-header #headerTitle img {
+#mainNav > header > div > img {
   height: max(50px, 0.1 * var(--vmin));
   padding: 0px max(13px, 0.03 * var(--vmin));
 }
-header #headerTitle h1 {
+#mainNav > header > div > h1 {
   font-size: max(1.3rem, 0.06 * var(--vmin));
 }
-
-nav {
+#mainNav > nav {
+  flex-basis: calc(1px * (1 + var(--menuOpen)) + 60px * var(--menuRowCount));
+  width: 100%;
   background-color: black;
   border-top: solid 1px rgb(180, 180, 185);
   overflow: hidden;
   transition: flex-basis 0.5s ease-out;
 }
-nav button, nav div button {
+#mainNav > nav > button, #mainNav > nav > div button {
   width: 100%;
   font-family: "Roboto-Bold", "arial", sans-serif;
   font-size: 1rem;
@@ -94,55 +91,57 @@ nav button, nav div button {
   background-color: black;
   cursor: pointer;
 }
-nav button:hover, nav div button:hover {
+#mainNav > nav > button:hover, #mainNav > nav > div button:hover {
   color: black;
   background-color: white;
 }
-nav > button {
+#mainNav > nav > button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
   height: 61px;
   border-bottom: solid 1px rgb(180, 180, 185);
   fill: white;
 }
-nav > button:hover {
+#mainNav > nav > button:hover {
   fill: black;
 }
-nav > button .menuIcon {
-  width: 11px;
-  height: 11px;
-  background-color: transparent;
-  margin-right: 4px;
+#mainNav > nav > button > svg {
+  width: 12px;
+  height: 12px;
 }
-nav > button .menuIcon rect {
-  x: -2.2781745931px;
-  width: 15.5563491861px;
-  height: 1.375px;
+#mainNav > nav > button > svg rect.menuIcon {
+  x: -2.4852813742px;
+  width: 16.9705627485px;
+  height: 1.5px;
   transform-origin: 50% 50%;
 }
-nav > button .menuIcon rect:nth-child(2) {
-  y: 4.8125px;
+#mainNav > nav > button > svg rect:nth-child(2 of .menuIcon) {
+  y: 5.25px;
 }
-nav > button .menuIcon rect:nth-child(1) {
-  y: calc(4.8125px * var(--menuOpen));
+#mainNav > nav > button > svg rect:nth-child(1 of .menuIcon) {
+  y: calc(5.25px * var(--menuOpen));
   transform: rotate(calc(var(--menuOpen) * 45deg));
 }
-nav > button .menuIcon rect:nth-child(2) {
+#mainNav > nav > button > svg rect:nth-child(2 of .menuIcon) {
   opacity: calc(100% * (1 - var(--menuOpen)));
   transition: opacity 0s linear 0.25s;
 }
-nav > button .menuIcon rect:nth-child(3) {
-  y: calc(4.8125px * (2 - var(--menuOpen)));
+#mainNav > nav > button > svg rect:nth-child(3 of .menuIcon) {
+  y: calc(5.25px * (2 - var(--menuOpen)));
   transform: rotate(calc(var(--menuOpen) * -45deg));
 }
-nav > button .menuIcon rect:nth-child(1), nav > button .menuIcon rect:nth-child(3) {
+#mainNav > nav > button > svg rect:nth-child(1 of .menuIcon), #mainNav > nav > button > svg rect:nth-child(3 of .menuIcon) {
   transition: y 0.25s linear calc(0.25s * (1 - var(--menuOpen))), transform 0.25s linear calc(var(--menuOpen) * 0.25s);
 }
-nav #menuItemContainer {
+#mainNav > nav #menuItemContainer {
   display: flex;
   flex-flow: column nowrap;
   align-items: center;
   justify-content: center;
 }
-nav #menuItemContainer button {
+#mainNav > nav #menuItemContainer button {
   flex-basis: 60px;
 }
 
@@ -150,14 +149,14 @@ nav #menuItemContainer button {
   body {
     --menuRowCount: 2;
   }
-  nav > button {
+  #mainNav > nav > button {
     display: none;
   }
-  nav #menuItemContainer {
+  #mainNav > nav #menuItemContainer {
     flex-flow: row wrap;
     padding: 15px calc((100vw - 450px) / 2);
   }
-  nav #menuItemContainer button {
+  #mainNav > nav #menuItemContainer button {
     flex-basis: max-content;
     height: 45px;
     padding: 0 20px;
@@ -167,15 +166,17 @@ nav #menuItemContainer button {
   body {
     --menuRowCount: 1;
   }
-  nav #menuItemContainer {
+  #mainNav > nav #menuItemContainer {
+    flex-wrap: nowrap;
     height: 100%;
     padding: 0;
   }
-  nav #menuItemContainer button {
+  #mainNav > nav #menuItemContainer button {
     height: 100%;
   }
 }
 #mainContent {
+  flex-grow: 1;
   padding: 30px max(30px, (100% - 600px) / 2) 30px;
   color: rgb(10, 10, 50);
   background-color: rgb(180, 180, 185);
@@ -204,6 +205,7 @@ nav #menuItemContainer button {
 }
 
 footer {
+  flex-basis: 200px;
   padding: 30px 0px 0px 30px;
   color: white;
   background-color: black;

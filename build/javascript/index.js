@@ -1,78 +1,86 @@
-import {Path} from './lib/Path.js'
-import {Hierarchy} from './lib/Hierarchy.js'
-import * as StyleSheetFunctions from './lib/StyleSheetFunctions.js'
+import {Path} from '/javascript/lib/Path.js'
+import {Hierarchy} from '/javascript/lib/Hierarchy.js'
+import * as StyleSheetFunctions from '/javascript/lib/StyleSheetFunctions.js'
+import {PageData, PageDataController} from '/javascript/lib/PageNavigation.js'
 
-import {PageData, PageDataController} from './lib/PageNavigation.js'
+class NavBar_UI {
+	domNode;
+	logoBtn;
+	navBtns = [];
+
+	cssMenuOpen;
+
+	constructor(navBtnNames, navBtnEvents) {
+		this.domNode = document.getElementById('mainNav');
+		this.logoBtn = this.domNode.children[0].children[0];
+		this.cssMenuOpen = new StyleSheetFunctions.CssToggleValue('/css/Global.css', 'body', '--menuOpen', ['0', '1']);
+
+		this.logoBtn.addEventListener('click', navBtnEvents[0]);
+		this.domNode.children[1].children[0].addEventListener('click', this.cssMenuOpen.toggle.bind(this.cssMenuOpen));
+		for (let i = 0; i < navBtnNames.length; ++i) {
+			let btn = document.createElement("button");
+			btn.appendChild(new Text(navBtnNames[i]));
+			btn.addEventListener('click', navBtnEvents[i]);
+			this.navBtns.push(btn);
+		}
+		this.domNode.children[1].children[1].append(...this.navBtns);
+	}
+};
 
 class NavBar {
 	#pageDataController;
 	#homeNode;
-	#cssomMenuOpen;
+	#UI;
 
-	#navBtns = [];
+	navHome(eventObj) {
+		this.#pageDataController.currentPage = this.#homeNode;
+		history.pushState({}, "", '/');
+		this.#UI.cssMenuOpen.close();
+	}
 
 	navBtnFunc(eventObj) {
-		if (eventObj.currentTarget === this.#navBtns[0]) {
-			this.#pageDataController.currentPageNode = this.#homeNode;
-			history.pushState({}, '', '/');
-		} else {
-			let index = 1;
-			while (index < this.#navBtns.length) {
-				if (this.#navBtns[index] === eventObj.currentTarget) {
-					this.#pageDataController.currentPageNode = this.#homeNode.data[index - 1];
-					history.pushState({}, '', this.#pageDataController.currentPageNode.data.pagePath.str);
-					break;
-				}
-				++index;
+		let index = 1;
+		while (index < this.#UI.navBtns.length) {
+			if (this.#UI.navBtns[index] === eventObj.currentTarget) {
+				this.#pageDataController.currentPage = this.#homeNode.children[index - 1];
+				history.pushState({}, '', this.#pageDataController.currentPageNode.data.pagePath.str);
+				break;
 			}
+			++index;
 		}
-		this.#cssomMenuOpen.style.setProperty('--menuOpen', '0');
+		this.#UI.cssMenuOpen.close();
 	}
 
 	constructor(pageDataController, currentPath) {
 		this.#pageDataController = pageDataController;
 		this.#homeNode = this.#pageDataController.hierarchy.root;
-		this.#cssomMenuOpen = StyleSheetFunctions.findRule('/css/Global.css', 'body');
-
-		let homeBtn = document.createElement("button");
-		homeBtn.innerHTML = 'Home';
-		homeBtn.addEventListener('click', this.navBtnFunc.bind(this));
-		this.#navBtns.push(homeBtn);
-		for (let i = 0; i < this.#homeNode.data.length; ++i) {
-			let btn = document.createElement("button");
-			btn.innerHTML = this.#homeNode.data[i].name;
-			btn.addEventListener('click', this.navBtnFunc.bind(this));
-			this.#navBtns.push(btn);
-		}
-		document.querySelector('#menuItemContainer').append(...this.#navBtns);
 
 		let node = (currentPath.str === '/index.html') ? 
 			this.#homeNode : 
 			this.#pageDataController.hierarchy.getNode(currentPath);
-		this.#pageDataController.currentPageNode = node;
+		this.#pageDataController.currentPage = node;
 
-		document.querySelector('#headerTitle').addEventListener('click', (event) => {
-			pageDataController.currentPageNode = this.#pageDataController.hierarchy.root;
-			history.pushState({}, "", '/');
-		});
-
-		document.querySelector('nav >button:first-child').addEventListener('click', (event) => {
-			let setVal = '1';
-			if (this.#cssomMenuOpen.style.getPropertyValue('--menuOpen') == setVal) {
-				setVal = '0';
-			}
-			this.#cssomMenuOpen.style.setProperty('--menuOpen', setVal);
-		});
+		let btnNames = ["Home"];
+		this.#homeNode.getChildrenNames(btnNames);
+		let btnEvents = [this.navHome.bind(this)];
+		for (let i = 1; i < btnNames.length; ++i) {
+			btnEvents.push(this.navBtnFunc.bind(this));
+		}
+		this.#UI = new NavBar_UI(btnNames, btnEvents);
 	}
 };
 
 let mainContentNode = document.getElementById('mainContent');
 function dataReady(pageData) {
-	if (pageDataController.currentPageData == pageData) {
+	if (pageDataController.currentPageData === pageData) {
 		mainContentNode.replaceChildren(pageData.fetchedHtmlNode);
 		document.body.scrollTop = 0;
-		document.adoptedStyleSheets = [pageData.cssStyleSheet];
+		document.adoptedStyleSheets[0] = pageData.cssStyleSheet;
 	}
+}
+
+function pageUrlToNodePath() {
+	return new Path((window.location.pathname.startsWith('/html/')) ? window.location.pathname.substring(5, window.location.pathname.length - 5) : window.location.pathname);
 }
 
 let pageDataController;
@@ -88,13 +96,12 @@ let navBar;
 	],
 	dataReady
 	);
+	document.adoptedStyleSheets = [new CSSStyleSheet()];
 
-	let navPath = new Path((window.location.pathname.startsWith('/html/')) ? window.location.pathname.substring(5, window.location.pathname.length - 5) : window.location.pathname);
-	navBar = new NavBar(pageDataController, navPath);
+	navBar = new NavBar(pageDataController, pageUrlToNodePath());
 
-	// Setup popstate
 	addEventListener('popstate', (event) => {
-		let navPath = new Path((window.location.pathname.startsWith('/html/')) ? window.location.pathname.substring(5, window.location.pathname.length - 5) : window.location.pathname);
-		pageDataController.currentPageNode = pageDataController.hierarchy.getNode(navPath);
+		let destNode = pageDataController.hierarchy.getNode(pageUrlToNodePath());
+		navBar.currentNode = destNode;
 	})
 })();

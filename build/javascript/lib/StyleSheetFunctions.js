@@ -25,14 +25,39 @@ export function setValue(href, selectorText, propertyName, val) {
 	return val;
 }
 
-export function toggleValue(href, selectorText, propertyName, defaultVal, alternateVal) {
-	let rule = findRule(href, selectorText);
-	if (rule == null) { return null; }
+export class CssValue {
+	cssStyleDeclaration;
+	propertyName;
 
-	let ret = defaultVal;
-	if (rule.style.getPropertyValue(propertyName) == defaultVal) {
-		ret = alternateVal;
+	setValue(val) {
+		this.cssStyleDeclaration.setProperty(this.propertyName, val);
 	}
-	rule.style.setProperty(propertyName, ret);
-	return ret;
+
+	constructor(href, selectorText, propertyName) {
+		this.cssStyleDeclaration = findRule(href, selectorText).style;
+		this.propertyName = propertyName
+	}
 }
+
+export class CssToggleValue extends CssValue {
+	#valArr;
+
+	setValueIndex(index) {
+		this.cssStyleDeclaration.setProperty(this.propertyName, this.#valArr[index]);
+	}
+	open = this.setValueIndex.bind(this, 1);
+	close = this.setValueIndex.bind(this, 0);
+
+	toggle() {
+		let destVal = this.#valArr[0];
+		if (this.cssStyleDeclaration.getPropertyValue(this.propertyName) == destVal) {
+			destVal = this.#valArr[1];
+		}
+		this.cssStyleDeclaration.setProperty(this.propertyName, destVal);
+	}
+
+	constructor(href, selectorText, propertyName, inputValArray) {
+		super(href, selectorText, propertyName);
+		this.#valArr = inputValArray;
+	}
+};

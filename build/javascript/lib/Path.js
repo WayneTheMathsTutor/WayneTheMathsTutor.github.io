@@ -3,10 +3,10 @@ export class Path {
 	#array = [];
 	#stem = null;
 	#extension = null;
-	#isAbsolute = 0;
-	#isBranch = 0;
+	#isAbsolute;
+	#isBranch;
 
-	set str(pathString) {
+	#setStr(pathString) {
 		this.#str = pathString;
 		this.#stem = null;
 		this.#extension = null;
@@ -21,7 +21,7 @@ export class Path {
 		}
 	}
 	get str() { return this.#str; }
-	setArray(pathArray, isAbsolute, isBranch) {
+	#setArray(pathArray, isAbsolute, isBranch) {
 		this.#array = pathArray;
 		this.#stem = null;
 		this.#extension = null;
@@ -32,39 +32,46 @@ export class Path {
 		this.#str += pathArray.join('/');
 		this.#str += (this.#str !== '/' && this.#isBranch) ? '/' : '';
 	}
+	get array() { return this.#array; }
 
 	get length() { return this.#array.length; }
 	get isAbsolute() { return this.#isAbsolute; }
 	get isBranch() { return this.#isBranch; }
 
-	at(index) { return this.#array.at(index); }
 	get tail() { return this.#array.at(-1); }
 	get stem() {
-		if (this.#stem === null &&
-			!this.#isBranch
-		) {
-			let tail = this.#array.at(-1);
-			let pos = tail.lastIndexOf('.');
-			this.#stem = (pos === -1) ? tail : tail.substring(0, pos);
+		if (this.#stem === null && !this.#isBranch) {
+			this.#lazyLoad();
 		}
 		return this.#stem;
 	}
 	get extension() {
-		if (this.#extension === null &&
-			!this.#isBranch
-		) {
-			let tail = this.#array.at(-1);
-			let pos = tail.lastIndexOf('.');
-			this.#extension = (pos === -1) ? null : tail.substring(pos + 1);
+		if (this.#extension === null && !this.#isBranch) {
+			this.#lazyLoad();
 		}
 		return this.#extension;
 	}
 
+	#lazyLoad() {
+		const tail = this.#array.at(-1);
+		const pos = tail.lastIndexOf('.');
+		this.#stem = (pos === -1) ? tail : tail.substring(0, pos);
+		this.#extension = (pos === -1) ? null : tail.substring(pos + 1);
+	}
+
+	reuse(pathItem, isAbsolute = 0, isBranch = 0) {
+		if (Array.isArray(pathItem)) {
+			this.#setArray(pathItem, isAbsolute, isBranch);
+		} else {
+			this.#setStr(pathItem);
+		}
+	}
+
 	constructor(pathItem, isAbsolute = 0, isBranch = 0) {
 		if (Array.isArray(pathItem)) {
-			this.setArray(pathItem, isAbsolute, isBranch);
+			this.#setArray(pathItem, isAbsolute, isBranch);
 		} else {
-			this.str = pathItem;
+			this.#setStr(pathItem);
 		}
 	}
 }

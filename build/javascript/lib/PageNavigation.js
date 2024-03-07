@@ -1,10 +1,9 @@
-import {Hierarchy} from './Hierarchy.js'
+import {HierarchyNodeID, Hierarchy} from './Hierarchy.js'
 import {Path} from './Path.js'
 
 export class PageData {
 	static defaultPageDataLoadFunc;
 
-	hierarchyNode = null;
 	#systematicPath = null;
 	#pagePath = null;
 	#cssPath = null;
@@ -14,30 +13,22 @@ export class PageData {
 	cssStyleSheet = null;
 	jsModule = null;
 
-	get systematicPath() { return this.#systematicPath; }
 	get pagePath() { return this.#pagePath; }
-	#generatePaths() {
-		this.#cssPath = new Path('/css' + this.#systematicPath.str + '.css');
-		this.#jsPath = new Path('/javascript' + this.#systematicPath.str + '.js');
-	}
 
 	activatePage(callbackFunc = PageData.defaultPageDataLoadFunc) {
-		if (this.#systematicPath === null) {
-			this.#systematicPath = this.hierarchyNode.getAbsolutePath();
-			this.#pagePath = new Path('/html' + this.#systematicPath.str + '.html');
-			this.#generatePaths();
-		}
-
 		if (this.fetchedHtmlNode === null) {
+			if (!(this.#systematicPath instanceof Path)) {
+				this.#generatePaths();
+			}
 			this.fetchedHtmlNode = 1;
 			this.cssStyleSheet = 1;
 			this.jsModule = 1;
-			fetch('/FetchedHtml' + this.systematicPath.str + '.html').then(response => {
+			fetch('/FetchedHtml' + this.#systematicPath.str + '.html').then(response => {
 				return response.text();
 			}).then(fetchedData => {
 				this.fetchedHtmlNode = document.createElement('div');
 				this.fetchedHtmlNode.innerHTML = fetchedData;
-				if (this.cssStyleSheet !== 1) {
+				if (this.cssStyleSheet !== 1 && this.jsModule !== 1) {
 					callbackFunc(this);
 				}
 			});
@@ -48,7 +39,13 @@ export class PageData {
 				return styleSheet.replace(fetchedData);
 			}).then(styleSheet => {
 				this.cssStyleSheet = styleSheet;
-				if (this.fetchedHtmlNode !== 1) {
+				if (this.fetchedHtmlNode !== 1 && this.jsModule !== 1) {
+					callbackFunc(this);
+				}
+			});
+			import(this.#jsPath.str).then((module) => {
+				this.jsModule = module;
+				if (this.fetchedHtmlNode !== 1 && this.cssStyleSheet !== 1) {
 					callbackFunc(this);
 				}
 			});
@@ -59,52 +56,63 @@ export class PageData {
 		}
 	}
 
-	constructor(inputHierarchyNodePath = null, inputPagePath = null) {
-		if (inputHierarchyNodePath !== null) {
-			this.#systematicPath = inputHierarchyNodePath;
-			this.#pagePath = inputPagePath;
-			this.#generatePaths();
+	#generatePaths() {
+		this.#systematicPath = this.#systematicPath.getAbsolutePath();
+		this.#pagePath = new Path('/html' + this.#systematicPath.str + '.html');
+		this.#cssPath = new Path('/css' + this.#systematicPath.str + '.css');
+		this.#jsPath = new Path('/javascript' + this.#systematicPath.str + '.js');
+	}
+
+	manualSetup(systematicPath, pagePath, cssPath, jsPath) {
+		if (this.#systematicPath === null) {
+			this.#systematicPath = systematicPath;
+			this.#pagePath = pagePath;
+			this.#cssPath = cssPath;
+			this.#jsPath = jsPath;
 		}
+	}
+
+	constructor(hierarchyNode = null) {
+		this.#systematicPath = hierarchyNode;
 	}
 }
 
 export class PageDataController {
 	hierarchy;
-	#currentPageNode;
-	#currentPageData;
+	#currentPage = [null, null];
 
-	#pageHome;
-	#page404;
+	#page404 = new PageData();
 
-	set currentPageNode(hierarchyNode) {
-		this.#currentPageNode = hierarchyNode;
-		if (this.#currentPageNode === null) {
-			this.#currentPageData = this.#page404;
-		} else if (this.#currentPageNode.parentNode === null) {
-			this.#currentPageData = this.#pageHome;
-		} else if (!this.currentPageNode.isBranch) {
-			this.#currentPageData = this.#currentPageNode.data;
+	set currentPage(dataNode) {
+		if (dataNode == null) {
+			this.#currentPage[0] = null;
+			this.#currentPage[1] = this.#page404;
+			this.#currentPage[1].activatePage();
+			return;
 		}
-		this.#currentPageData.activatePage();
-	}
-	get currentPageNode() { return this.#currentPageNode; }
 
-	get currentPageData() { return this.#currentPageData; }
+		if (dataNode.hasData) {
+			this.#currentPage[0] = dataNode;
+			this.#currentPage[1] = this.#currentPage[0].data;
+			this.#currentPage[1].activatePage();
+		} else {
+			throw "PageNavigation.js: currentPage cannot be set with a node that doesn't have data."
+		}
+	}
+	get currentPageNode() { return this.#currentPage[0]; }
+	get currentPageData() { return this.#currentPage[1]; }
 
 	constructor(inputNamesArray, defaultPageDataLoadFunc) {
 		PageData.defaultPageDataLoadFunc = defaultPageDataLoadFunc;
 
-		this.#pageHome = new PageData(new Path('/index'), new PageData('/index.html'));
-		this.#page404 = new PageData(new Path('/404'), new PageData('/404.html'));
+		this.#page404.manualSetup(new Path('/404'), new Path('/404.html'), new Path ('/css/404.css'), new Path('/javascript/404.js'));
 
-		this.hierarchy = new Hierarchy(inputNamesArray);
-		this.#pageHome.hierarchyNode = this.hierarchy.root;
-		for (let i = 0; i < this.hierarchy.leafNodes.length; ++i) {
-			let leafNode = this.hierarchy.leafNodes[i];
-			leafNode.data = new PageData();
-			leafNode.data.hierarchyNode = leafNode;
+		this.hierarchy = new Hierarchy(inputNamesArray, HierarchyNodeID.BRANCHDATANODE);
+		this.hierarchy.root.data = new PageData();
+		this.hierarchy.root.data.manualSetup(new Path('/index'), new Path('/index.html'), new Path ('/css/index.css'), new Path('/javascript/index.js'));
+		let dataNodes = this.hierarchy.getDataNodes();
+		for (let i = 1; i < dataNodes.length; ++i) {
+			dataNodes[i].data = new PageData(dataNodes[i]);
 		}
-
-		document.adoptedStyleSheets = [new CSSStyleSheet()];
 	}
 };
