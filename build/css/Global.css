@@ -143,6 +143,7 @@ body > * {
 }
 #mainNav > nav #menuItemContainer button {
   flex-basis: 60px;
+  padding: 0 calc(clamp(0px, 100vw - 449px, 1px) * 20);
 }
 
 @media screen and (min-width: 450px) {
@@ -159,7 +160,6 @@ body > * {
   #mainNav > nav #menuItemContainer button {
     flex-basis: max-content;
     height: 45px;
-    padding: 0 20px;
   }
 }
 @media screen and (min-width: 730px) {
@@ -167,7 +167,6 @@ body > * {
     --menuRowCount: 1;
   }
   #mainNav > nav #menuItemContainer {
-    flex-wrap: nowrap;
     height: 100%;
     padding: 0;
   }

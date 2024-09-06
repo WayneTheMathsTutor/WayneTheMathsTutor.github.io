@@ -6,7 +6,7 @@
 }
 #FeeOptions .FeeOption {
   box-sizing: border-box;
-  flex-basis: calc(100% - clamp(0px, 600 * (100% - 599px), 50% + 10px));
+  flex-basis: 100%;
   padding: 2.25rem 25px;
   border: solid rgb(50, 100, 200) 2px;
   border-radius: 10px;
