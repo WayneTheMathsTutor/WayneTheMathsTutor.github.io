@@ -89,7 +89,6 @@ let navBar;
 	pageDataController = new PageDataController([
 		'About',
 		'PrivateTuition',
-		'MathsLive',
 		'Testimonials',
 		'FAQs',
 		'Contact',
